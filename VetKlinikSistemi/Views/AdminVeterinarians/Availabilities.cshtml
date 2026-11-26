@@ -1,0 +1,105 @@
+﻿@model VetKlinikSistemi.DTOs.VetAvailabilityCreateViewModel
+@{
+    var vet = ViewBag.Veterinarian as VetKlinikSistemi.Models.Veterinarian;
+    ViewData["Title"] = "Müsaitlik Saatleri";
+
+    string GunAdi(DayOfWeek gun) => gun switch
+    {
+        DayOfWeek.Monday => "Pazartesi",
+        DayOfWeek.Tuesday => "Salı",
+        DayOfWeek.Wednesday => "Çarşamba",
+        DayOfWeek.Thursday => "Perşembe",
+        DayOfWeek.Friday => "Cuma",
+        DayOfWeek.Saturday => "Cumartesi",
+        DayOfWeek.Sunday => "Pazar",
+        _ => gun.ToString()
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">@vet?.FullName - Müsaitlik Takvimi</h2>
+        <small class="text-muted">Uzmanlık: @vet?.Specialty</small>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">← Hekim Listesine Dön</a>
+</div>
+
+<div class="row">
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Yeni Çalışma Saati Ekle</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="AddAvailability" method="post">
+                    <input type="hidden" asp-for="VeterinarianId" />
+                    <div class="mb-3">
+                        <label asp-for="DayOfWeek" class="form-label">Gün</label>
+                        <select asp-for="DayOfWeek" class="form-select">
+                            <option value="Monday">Pazartesi</option>
+                            <option value="Tuesday">Salı</option>
+                            <option value="Wednesday">Çarşamba</option>
+                            <option value="Thursday">Perşembe</option>
+                            <option value="Friday">Cuma</option>
+                            <option value="Saturday">Cumartesi</option>
+                            <option value="Sunday">Pazar</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="StartTime" class="form-label">Başlangıç Saati</label>
+                        <input asp-for="StartTime" type="time" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="EndTime" class="form-label">Bitiş Saati</label>
+                        <input asp-for="EndTime" type="time" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Saat Aralığı Ekle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Tanımlı Müsaitlik Saatleri</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Gün</th>
+                            <th>Başlangıç</th>
+                            <th>Bitiş</th>
+                            <th class="text-end">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (vet == null || !vet.Availabilities.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">Henüz müsaitlik saati tanımlanmamış.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var slot in vet.Availabilities.OrderBy(a => a.DayOfWeek).ThenBy(a => a.StartTime))
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@GunAdi(slot.DayOfWeek)</td>
+                                    <td>@slot.StartTime.ToString(@"hh\:mm")</td>
+                                    <td>@slot.EndTime.ToString(@"hh\:mm")</td>
+                                    <td class="text-end">
+                                        <form asp-action="DeleteAvailability" asp-route-id="@slot.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Kaldır</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

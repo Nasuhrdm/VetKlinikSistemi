@@ -1,0 +1,63 @@
+﻿@model IEnumerable<VetKlinikSistemi.Models.Veterinarian>
+@{
+    ViewData["Title"] = "Veteriner Hekimler";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Veteriner Hekimler</h2>
+    <a asp-action="Create" class="btn btn-success">+ Yeni Veteriner Hekim Ekle</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ad Soyad</th>
+                    <th>Uzmanlık Alanı</th>
+                    <th>Verebildiği Hizmetler</th>
+                    <th>Müsaitlik</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">Henüz kayıtlı veteriner hekim bulunmuyor.</td>
+                    </tr>
+                }
+                @foreach (var vet in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@vet.FullName</td>
+                        <td>@vet.Specialty</td>
+                        <td>
+                            @if (vet.Services.Any())
+                            {
+                                foreach (var s in vet.Services)
+                                {
+                                    <span class="badge bg-secondary me-1">@s.Name</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Hizmet atanmamış</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-dark">@vet.Availabilities.Count Zaman Dilimi</span>
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Availabilities" asp-route-id="@vet.Id" class="btn btn-sm btn-outline-success">Müsaitlik Saatleri</a>
+                            <a asp-action="Edit" asp-route-id="@vet.Id" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                            <form asp-action="Delete" asp-route-id="@vet.Id" method="post" class="d-inline" onsubmit="return confirm('Bu veteriner hekimi ve kullanıcı hesabını silmek istediğinize emin misiniz?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
