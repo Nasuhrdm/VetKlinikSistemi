@@ -1,0 +1,65 @@
+﻿@model VetKlinikSistemi.DTOs.PetFormViewModel
+@{
+    ViewData["Title"] = "Yeni Evcil Hayvan Ekle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Yeni Evcil Hayvan Kaydı</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Adı</label>
+                        <input asp-for="Name" class="form-control" placeholder="Örn: Pamuk, Karabaş" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Species" class="form-label">Tür</label>
+                            <select asp-for="Species" class="form-select">
+                                <option value="">Tür Seçiniz...</option>
+                                <option value="Kedi">Kedi</option>
+                                <option value="Köpek">Köpek</option>
+                                <option value="Kuş">Kuş</option>
+                                <option value="Tavşan">Tavşan</option>
+                                <option value="Hamster">Hamster</option>
+                                <option value="Diğer">Diğer</option>
+                            </select>
+                            <span asp-validation-for="Species" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Breed" class="form-label">Irk</label>
+                            <input asp-for="Breed" class="form-control" placeholder="Örn: Tekir, Golden Retriever" />
+                            <span asp-validation-for="Breed" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="BirthDate" class="form-label">Doğum Tarihi</label>
+                            <input asp-for="BirthDate" type="date" class="form-control" />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Weight" class="form-label">Kilo (kg)</label>
+                            <input asp-for="Weight" type="number" step="0.01" class="form-control" />
+                            <span asp-validation-for="Weight" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="PhotoFile" class="form-label">Fotoğraf (İsteğe Bağlı)</label>
+                        <input asp-for="PhotoFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="form-control" />
+                        <span asp-validation-for="PhotoFile" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                        <button type="submit" class="btn btn-success">Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -37,6 +37,12 @@
                                 </ul>
                             </li>
                         }
+                        @if (User.IsInRole("Uye"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-info fw-semibold" asp-controller="Pets" asp-action="Index">Evcil Hayvanlarım</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav">
                         @if (SignInManager.IsSignedIn(User))

@@ -1,0 +1,82 @@
+﻿@model IEnumerable<VetKlinikSistemi.Models.Pet>
+@{
+    ViewData["Title"] = "Evcil Hayvanlarım";
+
+    string YasHesapla(DateTime birthDate)
+    {
+        var today = DateTime.Today;
+        int years = today.Year - birthDate.Year;
+        int months = today.Month - birthDate.Month;
+        if (today.Day < birthDate.Day) months--;
+        if (months < 0)
+        {
+            years--;
+            months += 12;
+        }
+        if (years > 0 && months > 0) return $"{years} Yaş {months} Ay";
+        if (years > 0) return $"{years} Yaş";
+        return $"{Math.Max(1, months)} Aylık";
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Evcil Hayvanlarım</h2>
+        <small class="text-muted">Kayıtlı dostlarınızın bilgilerini, aşı takvimlerini ve muayene geçmişlerini yönetin.</small>
+    </div>
+    <a asp-action="Create" class="btn btn-success">+ Yeni Evcil Hayvan Ekle</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card shadow-sm text-center py-5">
+        <div class="card-body">
+            <h4 class="text-muted mb-3">Henüz kayıtlı bir evcil hayvanınız bulunmuyor.</h4>
+            <p class="text-muted mb-4">Randevu alabilmek ve aşı takvimini takip edebilmek için ilk kaydınızı oluşturun.</p>
+            <a asp-action="Create" class="btn btn-primary">İlk Evcil Hayvanımı Ekle</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var pet in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(pet.PhotoUrl))
+                    {
+                        <img src="@pet.PhotoUrl" class="card-img-top" alt="@pet.Name" style="height: 220px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <span style="font-size: 4rem;">🐾</span>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0 fw-bold">@pet.Name</h5>
+                            <span class="badge bg-primary">@pet.Species</span>
+                        </div>
+                        <p class="card-text text-muted mb-2">@pet.Breed</p>
+                        <ul class="list-unstyled small mb-3">
+                            <li><strong>Yaş:</strong> @YasHesapla(pet.BirthDate) (@pet.BirthDate.ToString("dd.MM.yyyy"))</li>
+                            <li><strong>Kilo:</strong> @pet.Weight.ToString("N2") kg</li>
+                            <li><strong>Kayıtlı Aşı:</strong> @pet.VaccinationRecords.Count adet</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-white d-flex justify-content-between">
+                        <a asp-action="Details" asp-route-id="@pet.Id" class="btn btn-sm btn-info text-dark fw-semibold">Aşı & Detay</a>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@pet.Id" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                            <form asp-action="Delete" asp-route-id="@pet.Id" method="post" class="d-inline" onsubmit="return confirm('@pet.Name kaydını silmek istediğinize emin misiniz?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

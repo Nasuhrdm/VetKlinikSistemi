@@ -1,0 +1,155 @@
+﻿@model VetKlinikSistemi.Models.Pet
+@{
+    ViewData["Title"] = $"{Model.Name} - Sağlık ve Aşı Karnesi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>@Model.Name - Sağlık & Aşı Karnesi</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary me-2">Bilgileri Düzenle</a>
+        <a asp-action="Index" class="btn btn-secondary">← Evcil Hayvanlarıma Dön</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+            {
+                <img src="@Model.PhotoUrl" class="card-img-top" alt="@Model.Name" style="height: 240px; object-fit: cover;" />
+            }
+            else
+            {
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 240px;">
+                    <span style="font-size: 5rem;">🐾</span>
+                </div>
+            }
+            <div class="card-body">
+                <h4 class="card-title fw-bold">@Model.Name</h4>
+                <span class="badge bg-primary mb-3">@Model.Species - @Model.Breed</span>
+                <p class="mb-1"><strong>Doğum Tarihi:</strong> @Model.BirthDate.ToString("dd.MM.yyyy")</p>
+                <p class="mb-0"><strong>Güncel Kilo:</strong> @Model.Weight.ToString("N2") kg</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Aşı Takvimi ve Geçmişi</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="AddVaccination" method="post" class="row g-2 mb-4 border-bottom pb-3">
+                    <input type="hidden" name="PetId" value="@Model.Id" />
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Aşı Adı</label>
+                        <input type="text" name="VaccineName" class="form-control form-control-sm" placeholder="Örn: Kuduz, Karma" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Yapıldığı Tarih</label>
+                        <input type="date" name="DateAdministered" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Sonraki Doz Tarihi</label>
+                        <input type="date" name="NextDueDate" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success btn-sm w-100">+ Ekle</button>
+                    </div>
+                    <div class="col-12">
+                        <input type="text" name="Notes" class="form-control form-control-sm" placeholder="Not (İsteğe bağlı: Klinik adı, parti no vb.)" />
+                    </div>
+                </form>
+
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Aşı Adı</th>
+                            <th>Uygulama Tarihi</th>
+                            <th>Sonraki Tarih</th>
+                            <th>Not</th>
+                            <th class="text-end">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.VaccinationRecords.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">Henüz aşı kaydı bulunmuyor.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var vac in Model.VaccinationRecords.OrderByDescending(v => v.DateAdministered))
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@vac.VaccineName</td>
+                                    <td>@vac.DateAdministered.ToString("dd.MM.yyyy")</td>
+                                    <td>
+                                        @if (vac.NextDueDate.HasValue)
+                                        {
+                                            bool overdue = vac.NextDueDate.Value.Date < DateTime.Today;
+                                            <span class="badge @(overdue ? "bg-danger" : "bg-warning text-dark")">
+                                                @vac.NextDueDate.Value.ToString("dd.MM.yyyy")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>@(vac.Notes ?? "-")</td>
+                                    <td class="text-end">
+                                        <form asp-action="DeleteVaccination" asp-route-id="@vac.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Muayene ve Randevu Geçmişi</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Hizmet</th>
+                            <th>Hekim</th>
+                            <th>Durum</th>
+                            <th>Muayene Notu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Appointments.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">Henüz randevu veya muayene kaydı bulunmuyor.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var app in Model.Appointments.OrderByDescending(a => a.AppointmentDate))
+                            {
+                                <tr>
+                                    <td>@app.AppointmentDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td>@app.ClinicService?.Name</td>
+                                    <td>@app.Veterinarian?.FullName</td>
+                                    <td><span class="badge bg-secondary">@app.Status</span></td>
+                                    <td>@(app.ExaminationNote ?? "-")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
